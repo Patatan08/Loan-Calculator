@@ -1,4 +1,4 @@
-package com.example.kalkulatorfinansowy;
+package com.example.kalkulatorkredytowy;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
