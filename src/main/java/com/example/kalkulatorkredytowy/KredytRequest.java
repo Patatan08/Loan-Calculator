@@ -1,6 +1,6 @@
 package com.example.kalkulatorkredytowy;
 
-import lombok.Data;
+import lombo.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
@@ -15,3 +15,4 @@ public class KredytRequest {
     private LocalDate loanDate;
     private BigDecimal annualInterestRate;
 }
+
