@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class KalkulatorKredytowyApplicatoinTests {
+public class KalkulatorKredytowyApplicationTests {
 
     @LocalServerPort
     private int port;
