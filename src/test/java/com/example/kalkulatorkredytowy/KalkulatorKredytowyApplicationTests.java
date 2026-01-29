@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -45,10 +46,7 @@ public class KalkulatorKredytowyApplicationTests {
     @Test
     void testWhenAmountIsNull() {
         KredytRequest request = new KredytRequest(
-                null,
-                12,
-                LocalDate.now(),
-                new BigDecimal("5.0")
+                null, 12, LocalDate.now(), new BigDecimal("5.0")
         );
         HttpEntity<KredytRequest> httpEntity = new HttpEntity<>(request);
 
@@ -57,7 +55,8 @@ public class KalkulatorKredytowyApplicationTests {
                 httpEntity,
                 String.class
         );
-        System.out.println(response.getStatusCode());
-        assertNotEquals(HttpStatus.OK, response.getStatusCode());
+
+        HttpStatus status = response.getStatusCode();
+        System.out.println("Status: " + status);
+        assertTrue(status == HttpStatus.BAD_REQUEST || status == HttpStatus.INTERNAL_SERVER_ERROR);
     }
-}
