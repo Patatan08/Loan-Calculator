@@ -10,7 +10,7 @@ import org.springframework.http.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class KalkulatorKredytowyApplicationTests {
@@ -40,5 +40,24 @@ public class KalkulatorKredytowyApplicationTests {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(new BigDecimal("875.00"), response.getBody());
+    }
+
+    @Test
+    void testWhenAmountIsNull() {
+        KredytRequest request = new KredytRequest(
+                null,
+                12,
+                LocalDate.now(),
+                new BigDecimal("5.0")
+        );
+        HttpEntity<KredytRequest> httpEntity = new HttpEntity<>(request);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:" + port + "/oblicz",
+                httpEntity,
+                String.class
+        );
+        System.out.println("Status: " + response.getStatusCode());
+        assertNotEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
