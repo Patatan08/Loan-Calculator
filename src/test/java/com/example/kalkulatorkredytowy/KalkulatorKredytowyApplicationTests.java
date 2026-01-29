@@ -57,7 +57,7 @@ public class KalkulatorKredytowyApplicationTests {
                 httpEntity,
                 String.class
         );
-        System.out.println("Status: " + response.getStatusCode());
+        System.out.println(response.getStatusCode());
         assertNotEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
