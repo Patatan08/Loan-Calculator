@@ -9,18 +9,20 @@ import java.math.BigDecimal;
 
 @RestController
 public class KredytController {
+
     @Autowired
     private KredytSerwis kredytSerwis;
-    @PostMapping("/oblicz")
-    public BigDecimal calculateRate (@RequestBody KredytRequest request) {
 
-        BigDecimal installment = kredytSerwis.calculateRate(
+    @PostMapping("/oblicz")
+    public BigDecimal calculateRate(@RequestBody KredytRequest request) {
+        return kredytSerwis.calculateRate(
                 request.getAmount(),
                 request.getAnnualInterestRate(),
+                request.getDecisionDate(),
                 request.getMonths()
-        );
-        return installment;
+                );
     }
+}
 
-    }
+}
 
