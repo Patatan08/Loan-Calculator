@@ -1,36 +1,49 @@
 package com.example.kalkulatorkredytowy;
 
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class KredytSerwis {
 
-    public BigDecimal calculateRate(BigDecimal sum, BigDecimal LoanInterest, int months) {
-        if(sum == null){
-            throw new RuntimeException("Podana kwota jest błędna");
-        }
-        if(LoanInterest == null){
-            throw new RuntimeException("Podane oprocentowanie jest błędne");
-        }
-        if (sum.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Kwota musi być większa od 0");
-        }
-        if(months <= 0){
-            throw new RuntimeException("Podana ilość miesięcy jest błędna");
-        }
-        BigDecimal years = new BigDecimal(months).divide(new BigDecimal(12), 10, BigDecimal.ROUND_HALF_UP);
+    public BigDecimal calculateRate(BigDecimal amount, int months,
+                                    LocalDate loanDate, BigDecimal annualInterestRate) {
 
-            BigDecimal interest = sum
-                    .multiply(LoanInterest)
-                    .divide(new BigDecimal(100), 10, BigDecimal.ROUND_HALF_UP)
-                    .multiply(years);
+        LocalDate firstPaymentDate = loanDate.withDayOfMonth(1).plusMonths(1);
 
-        BigDecimal total = sum.add(interest);
+        long daysToFirstPayment = ChronoUnit.DAYS.between(loanDate, firstPaymentDate);
 
-        BigDecimal installment = total.divide(new BigDecimal(months), 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal dailyInterestRate = annualInterestRate
+                .divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP)
+                .divide(new BigDecimal("365"), 10, RoundingMode.HALF_UP);
 
-        return installment;
+        BigDecimal interestForFirstPeriod = amount
+                .multiply(dailyInterestRate)
+                .multiply(new BigDecimal(daysToFirstPayment));
+
+        BigDecimal monthlyPayment = calculateAnnuityPayment(amount, months, annualInterestRate);
+
+        BigDecimal firstPaymentWithInterest = monthlyPayment.add(interestForFirstPeriod);
+
+        return monthlyPayment.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calculateAnnuityPayment(BigDecimal amount, int months, BigDecimal annualInterestRate) {
+        BigDecimal monthlyInterestRate = annualInterestRate
+                .divide(new BigDecimal("100"), 10, RoundingMode.HALF_UP)
+                .divide(new BigDecimal("12"), 10, RoundingMode.HALF_UP);
+
+        BigDecimal onePlusR = BigDecimal.ONE.add(monthlyInterestRate);
+        BigDecimal powOnePlusR = onePlusR.pow(months);
+
+        BigDecimal numerator = monthlyInterestRate.multiply(powOnePlusR);
+        BigDecimal denominator = powOnePlusR.subtract(BigDecimal.ONE);
+
+        BigDecimal annuityFactor = numerator.divide(denominator, 10, RoundingMode.HALF_UP);
+
+        return amount.multiply(annuityFactor);
     }
 }

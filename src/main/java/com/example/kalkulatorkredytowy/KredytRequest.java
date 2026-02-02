@@ -12,7 +12,6 @@ import java.time.LocalDate;
 public class KredytRequest {
     private BigDecimal amount;
     private int months;
-    private LocalDate decisionDate;
     private LocalDate loanDate;
     private BigDecimal annualInterestRate;
 

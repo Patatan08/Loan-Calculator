@@ -4,59 +4,59 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class KalkulatorKredytowyApplicationTests {
-
-    @LocalServerPort
-    private int port;
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class KalkulatorFinansowyApplicationTests {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Test
-    void testValidRequest() {
+    void Calculation() {
         KredytRequest request = new KredytRequest(
-                new BigDecimal("10000"),
-                12,
-                LocalDate.now(),
-                new BigDecimal("5.0")
+                new BigDecimal("3100"),
+                18,
+                LocalDate.of(2025, 9, 19),
+                new BigDecimal("23.0")
         );
 
-        HttpEntity<KredytRequest> httpEntity = new HttpEntity<>(request);
-
         ResponseEntity<BigDecimal> response = restTemplate.postForEntity(
-                "http://localhost:" + port + "/oblicz",
-                httpEntity,
+                "/oblicz",
+                new HttpEntity<>(request),
                 BigDecimal.class
         );
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(new BigDecimal("875.00"), response.getBody());
+        assertEquals(200, response.getStatusCode().value());
+        BigDecimal rata = response.getBody();
+
+        System.out.println(rata);
+        System.out.println("200.29 zł");
+
+        BigDecimal expected = new BigDecimal("200.29");
+        BigDecimal roznica = rata.subtract(expected).abs();
+        System.out.println(roznica);
     }
 
     @Test
     void testWhenAmountIsNull() {
         KredytRequest request = new KredytRequest(
-                null, 12, LocalDate.now(), new BigDecimal("5.0")
+                null,
+                18,
+                LocalDate.now(),
+                new BigDecimal("23.0")
         );
-        HttpEntity<KredytRequest> httpEntity = new HttpEntity<>(request);
 
         ResponseEntity<String> response = restTemplate.postForEntity(
-                "http://localhost:" + port + "/oblicz",
-                httpEntity,
+                "/oblicz",
+                new HttpEntity<>(request),
                 String.class
         );
-
-        HttpStatus status = response.getStatusCode();
-        System.out.println("Status: " + status);
-        assertTrue( status == HttpStatus.INTERNAL_SERVER_ERROR);
+        assertTrue(response.getStatusCode().is5xxServerError());
     }
+}

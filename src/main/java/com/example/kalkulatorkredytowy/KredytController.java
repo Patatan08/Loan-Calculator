@@ -17,12 +17,13 @@ public class KredytController {
     public BigDecimal calculateRate(@RequestBody KredytRequest request) {
         return kredytSerwis.calculateRate(
                 request.getAmount(),
-                request.getAnnualInterestRate(),
-                request.getDecisionDate(),
-                request.getMonths()
-                );
+                request.getMonths(),
+                request.getLoanDate(),
+                request.getAnnualInterestRate()
+
+        );
     }
 }
 
-}
+
 
