@@ -1,27 +1,21 @@
 package com.example.kalkulatorkredytowy;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.math.BigDecimal;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/kalkulatorkredytowy")
 public class KredytController {
 
     @Autowired
-    private KredytSerwis kredytSerwis;
+    private KredytService kredytService;
 
     @PostMapping("/oblicz")
-    public BigDecimal calculateRate(@RequestBody KredytRequest request) {
-        return kredytSerwis.calculateRate(
-                request.getAmount(),
-                request.getMonths(),
-                request.getLoanDate(),
-                request.getAnnualInterestRate()
-
-        );
+    public ResponseEntity<KredytResponse> calculateLoan(@Valid @RequestBody KredytRequest request) {
+        KredytResponse response = kredytService.calculateLoanSchedule(request);
+        return ResponseEntity.ok(response);
     }
 }
 

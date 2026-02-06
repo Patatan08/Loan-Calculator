@@ -1,62 +1,52 @@
 package com.example.kalkulatorkredytowy;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class KalkulatorFinansowyApplicationTests {
+@SpringBootTest
+class KalkulatorKredytowyApplicationTests {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private KredytService kredytService;
 
-    @Test
-    void Calculation() {
-        KredytRequest request = new KredytRequest(
-                new BigDecimal("3100"),
-                18,
-                LocalDate.of(2025, 9, 19),
-                new BigDecimal("23.0")
-        );
+    private KredytRequest kredytRequest;
 
-        ResponseEntity<BigDecimal> response = restTemplate.postForEntity(
-                "/oblicz",
-                new HttpEntity<>(request),
-                BigDecimal.class
-        );
-
-        assertEquals(200, response.getStatusCode().value());
-        BigDecimal rata = response.getBody();
-
-        System.out.println(rata);
-        System.out.println("200.29 zł");
-
-        BigDecimal expected = new BigDecimal("200.29");
-        BigDecimal roznica = rata.subtract(expected).abs();
-        System.out.println(roznica);
+    @BeforeEach
+    void setUp() {
+        kredytRequest = new KredytRequest();
+        kredytRequest.setLoanAmount(new BigDecimal("3100.00"));
+        kredytRequest.setNumberOfInstallments(20);
+        kredytRequest.setDecisionDate(LocalDate.of(2027, 3, 30));
+        kredytRequest.setAnnualInterestRate(new BigDecimal("0.24"));
     }
 
     @Test
-    void testWhenAmountIsNull() {
-        KredytRequest request = new KredytRequest(
-                null,
-                18,
-                LocalDate.now(),
-                new BigDecimal("23.0")
-        );
-
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "/oblicz",
-                new HttpEntity<>(request),
-                String.class
-        );
-        assertTrue(response.getStatusCode().is5xxServerError());
+    void Calculation() {
+        BigDecimal expectedInstallmentAmount = new BigDecimal("184.59");
+        KredytResponse response = kredytService.calculateLoanSchedule(kredytRequest);
+        assertNotNull(response);
+        assertNotNull(response.getInstallmentAmount());
+        assertEquals(0, expectedInstallmentAmount.compareTo(response.getInstallmentAmount()));
+    }
+    @Test
+    void INTERNAL_SERVER_ERROR_HANDLE() {
+        kredytRequest.setLoanAmount(null);
+        Exception exception = assertThrows(Exception.class, () -> {
+            kredytService.calculateLoanSchedule(kredytRequest);});
+        if (exception instanceof ResponseStatusException) {
+            ResponseStatusException responseException = (ResponseStatusException) exception;
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseException.getStatusCode());
+        } else {
+            assertTrue(exception instanceof NullPointerException || exception instanceof IllegalArgumentException);
+        }
     }
 }
