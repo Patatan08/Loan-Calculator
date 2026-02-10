@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoanServiceTest {
 
     @Autowired
-    private KredytService kredytService;
+    private LoanService loanService;
 
     @ParameterizedTest
     @CsvSource({
@@ -35,39 +35,39 @@ class LoanServiceTest {
 
             "10000.00, 30, 2025-01-10, 0.12, 381.51"
     })
-    void Calculation(
-            String kwota,
-            int iloscRat,
-            String dataDecyzji,
-            String oprocentowanie,
-            String oczekiwanaRata) {
+    void testCalculation(
+            String loanAmount,
+            int numberOfInstallments,
+            String decisionDate,
+            String annualInterestRate,
+            String expectedInstallmentAmount) {
 
-        KredytRequest request = new KredytRequest();
-        request.setLoanAmount(new BigDecimal(kwota));
-        request.setNumberOfInstallments(iloscRat);
-        request.setDecisionDate(LocalDate.parse(dataDecyzji));
-        request.setAnnualInterestRate(new BigDecimal(oprocentowanie));
+        LoanRequest request = new LoanRequest();
+        request.setLoanAmount(new BigDecimal(loanAmount));
+        request.setNumberOfInstallments(numberOfInstallments);
+        request.setDecisionDate(LocalDate.parse(decisionDate));
+        request.setAnnualInterestRate(new BigDecimal(annualInterestRate));
 
-        KredytResponse response = kredytService.calculateLoanSchedule(request);
+        LoanResponse response = loanService.calculateLoanSchedule(request);
 
         assertNotNull(response);
         assertNotNull(response.getInstallmentAmount());
 
-        BigDecimal expected = new BigDecimal(oczekiwanaRata);
+        BigDecimal expected = new BigDecimal(expectedInstallmentAmount);
         assertEquals(0, expected.compareTo(response.getInstallmentAmount()),
-                String.format(kwota, iloscRat, dataDecyzji, oprocentowanie));
+                String.format(loanAmount, numberOfInstallments, decisionDate, annualInterestRate));
     }
 
     @Test
     void testInternalServerError() {
-        KredytRequest request = new KredytRequest();
+        LoanRequest request = new LoanRequest();
         request.setLoanAmount(null);
         request.setNumberOfInstallments(20);
         request.setDecisionDate(LocalDate.of(2027, 3, 30));
         request.setAnnualInterestRate(new BigDecimal("0.24"));
 
         Exception exception = assertThrows(Exception.class, () -> {
-            kredytService.calculateLoanSchedule(request);
+            loanService.calculateLoanSchedule(request);
         });
 
         if (exception instanceof ResponseStatusException) {

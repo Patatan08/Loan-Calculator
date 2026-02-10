@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class KredytService {
+public class LoanService {
     private static final int DAYS_IN_YEAR = 365;
     private static final int ROUNDING_SCALE = 2;
 
-    public KredytResponse calculateLoanSchedule(KredytRequest request) {
+    public LoanResponse calculateLoanSchedule(LoanRequest request) {
         BigDecimal loanAmount = request.getLoanAmount();
         Integer numberOfInstallments = request.getNumberOfInstallments();
         LocalDate decisionDate = request.getDecisionDate();
@@ -35,7 +35,7 @@ public class KredytService {
         BigDecimal totalInterest = calculateTotalInterest(schedule);
         BigDecimal installmentAmount = calculateInstallmentAmount(loanAmount, totalInterest, numberOfInstallments);
 
-        return new KredytResponse(installmentAmount, totalInterest, schedule);
+        return new LoanResponse(installmentAmount, totalInterest, schedule);
     }
 
     private List<Installment> generateSchedule(

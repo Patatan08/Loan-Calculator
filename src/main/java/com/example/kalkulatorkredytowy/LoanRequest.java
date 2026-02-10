@@ -7,14 +7,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class KredytRequest {
+public class LoanRequest {
     @NotNull(message = "Nie podany kwoty")
     private BigDecimal loanAmount;
 
     @NotNull(message = "Nie podano ilości rat")
     private Integer numberOfInstallments;
 
-    @NotNull(message = "Nie podany daty wydania")
+    @NotNull(message = "Nie podano daty wydania")
     @FutureOrPresent(message = "Data wydania decyzji nie może być w przeszłości")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate decisionDate;
